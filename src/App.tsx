@@ -1,7 +1,12 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
-import Map3D, { ProjectionFnParamType } from "./map3d";
+import MapController from "./components/MapController";
 import { GeoJsonType } from "./map3d/typed";
+
+export type ProjectionFnParamType = {
+  center: [number, number];
+  scale: number;
+};
 
 // 地图放大倍率
 const MapScale: any = {
@@ -19,10 +24,6 @@ function App() {
       scale: 40,
     });
 
-  useEffect(() => {
-    queryMapData(mapAdCode); // 默认的中国adcode码
-  }, [mapAdCode]);
-
   // 请求地图数据
   const queryMapData = useCallback(async (code: number) => {
     const response = await axios.get(
@@ -31,6 +32,10 @@ function App() {
     const { data } = response;
     setGeoJson(data);
   }, []);
+
+  useEffect(() => {
+    queryMapData(mapAdCode); // 默认的中国adcode码
+  }, [mapAdCode, queryMapData]);
 
   // 双击事件
   const dblClickFn = (customProperties: any) => {
@@ -44,7 +49,7 @@ function App() {
   return (
     <>
       {geoJson && (
-        <Map3D
+        <MapController
           geoJson={geoJson}
           dblClickFn={dblClickFn}
           projectionFnParam={projectionFnParam}

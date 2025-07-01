@@ -113,7 +113,7 @@ export function drawExtrudeMesh(
   return { mesh, line };
 }
 
-// 生成地图3D模型
+// 生成地图3D模型（仅包含地图本身，不包含标签、点位等元素）
 export function generateMapObject3D(
   mapdata: GeoJsonType,
   projectionFnParam: ProjectionFnParamType
@@ -183,6 +183,65 @@ export function generateMapObject3D(
   });
 
   return { mapObject3D, label2dData };
+}
+
+// 根据地图数据生成元素数据（用于MapManager）
+export function generateElementsData(label2dData: any[]) {
+  const elements: any[] = [];
+  
+  label2dData.forEach((item: any, index: number) => {
+    const { featureCenterCoord, featureName } = item;
+    
+    // 生成标签元素
+    elements.push({
+      id: `label-${index}`,
+      type: 'label',
+      position: featureCenterCoord,
+      text: featureName,
+    });
+    
+    // 生成点位元素
+    elements.push({
+      id: `spot-${index}`,
+      type: 'spot',
+      position: featureCenterCoord,
+    });
+    
+    // 生成模型元素
+    elements.push({
+      id: `model-${index}`,
+      type: 'model',
+      position: featureCenterCoord,
+      modelPath: '/models/cone.glb',
+      scale: [0.3, 0.3, 0.6],
+      animation: true,
+    });
+  });
+  
+  return elements;
+}
+
+// 生成连线元素数据
+export function generateLineElementsData(label2dData: any[], maxLineCount: number = 5) {
+  const elements: any[] = [];
+  
+  for (let count = 0; count < maxLineCount; count++) {
+    const midIndex = Math.floor(label2dData.length / 2);
+    const indexStart = Math.floor(Math.random() * midIndex);
+    const indexEnd = Math.floor(Math.random() * midIndex) + midIndex - 1;
+    
+    if (indexStart < label2dData.length && indexEnd < label2dData.length) {
+      elements.push({
+        id: `line-${count}`,
+        type: 'line',
+        position: label2dData[indexStart].featureCenterCoord,
+        startPosition: label2dData[indexStart].featureCenterCoord,
+        endPosition: label2dData[indexEnd].featureCenterCoord,
+      });
+    }
+  }
+  
+  return elements;
 }
 
 // 生成地图2D标签

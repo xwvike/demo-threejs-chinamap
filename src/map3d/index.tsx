@@ -1,25 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import ToolTip from "../tooltip";
 import {
-  drawLineBetween2Spot,
-  generateMapLabel2D,
   generateMapObject3D,
-  generateMapSpot,
+  generateElementsData,
+  generateLineElementsData,
   getDynamicMapScale,
 } from "./drawFunc";
 import { GeoJsonType } from "./typed";
 import gsap from "gsap";
 
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
-import { drawRadar, radarData, RadarOption } from "./radar";
 import { initScene } from "./scene";
 import { mapConfig } from "./mapConfig";
 import { initCamera } from "./camera";
+import { MapManager } from "./mapManager";
 
 export type ProjectionFnParamType = {
   center: [number, number];
@@ -32,17 +29,51 @@ interface Props {
   projectionFnParam: ProjectionFnParamType;
 }
 
+// 定义暴露给父组件的方法接口
+export interface Map3DRef {
+  addElements: (elements: any[]) => Promise<void>;
+  removeElements: (ids: string[]) => void;
+  clearElements: () => void;
+}
+
 let lastPick: any = null;
 
-function Map3D(props: Props) {
+const Map3D = forwardRef<Map3DRef, Props>((props, ref) => {
   const { geoJson, dblClickFn, projectionFnParam } = props;
   const mapRef = useRef<any>();
   const map2dRef = useRef<any>();
   const toolTipRef = useRef<any>();
+  const mapManagerRef = useRef<MapManager | null>(null);
 
   const [toolTipData, setToolTipData] = useState<any>({
     text: "",
   });
+
+  // 暴露给外部的方法
+  const addMapElements = useCallback(async (elements: any[]) => {
+    if (mapManagerRef.current) {
+      await mapManagerRef.current.addElements(elements);
+    }
+  }, []);
+
+  const removeMapElements = useCallback((ids: string[]) => {
+    if (mapManagerRef.current) {
+      mapManagerRef.current.removeElements(ids);
+    }
+  }, []);
+
+  const clearAllMapElements = useCallback(() => {
+    if (mapManagerRef.current) {
+      mapManagerRef.current.clearAllElements();
+    }
+  }, []);
+
+  // 使用 useImperativeHandle 暴露方法给父组件
+  useImperativeHandle(ref, () => ({
+    addElements: addMapElements,
+    removeElements: removeMapElements,
+    clearElements: clearAllMapElements,
+  }), [addMapElements, removeMapElements, clearAllMapElements]);
 
   useEffect(() => {
     const currentDom = mapRef.current;
@@ -59,18 +90,14 @@ function Map3D(props: Props) {
     /**
      * 初始化摄像机
      */
-    const { camera, cameraHelper } = initCamera(currentDom);
+    const { camera } = initCamera(currentDom);
 
     /**
      * 初始化渲染器
      */
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(currentDom.clientWidth, currentDom.clientHeight);
-    // 防止开发时重复渲染
-    // if (!currentDom.hasChildNodes()) {
-    //   currentDom.appendChild(renderer.domElement);
-    // }
-    // 这里修改为下面写法，否则 onresize 不生效
+    
     if (currentDom.childNodes[0]) {
       currentDom.removeChild(currentDom.childNodes[0]);
     }
@@ -90,7 +117,7 @@ function Map3D(props: Props) {
     labelRendererDom.appendChild(labelRenderer.domElement);
 
     /**
-     * 初始化模型（绘制3D模型）
+     * 初始化地图3D模型（只包含地图本身）
      */
     const { mapObject3D, label2dData } = generateMapObject3D(
       geoJson,
@@ -99,121 +126,35 @@ function Map3D(props: Props) {
     scene.add(mapObject3D);
 
     /**
+     * 初始化地图管理器
+     */
+    const mapManager = new MapManager(scene, mapObject3D);
+    mapManagerRef.current = mapManager;
+
+    /**
      * 动态地图缩放大小
      */
     const mapScale = getDynamicMapScale(mapObject3D, currentDom);
 
     /**
-     * 绘制 2D 面板
+     * 初始化默认元素（标签、点位、模型、连线）
      */
-    const labelObject2D = generateMapLabel2D(label2dData);
-    mapObject3D.add(labelObject2D);
+    const initDefaultElements = async () => {
+      // 生成基础元素数据
+      const elementsData = generateElementsData(label2dData);
+      const lineElementsData = generateLineElementsData(label2dData, 5);
+      console.log(elementsData)
+      
+      // 添加所有元素
+      await mapManager.addElements([...elementsData, ...lineElementsData]);
+    };
 
-    /**
-     * 绘制点位
-     */
-    const { spotList, spotObject3D } = generateMapSpot(label2dData);
-    mapObject3D.add(spotObject3D);
-
-    // Models
-    // coneUncompression.glb 是压缩过的模型，需要用dracoLoader加载
-    // cone.glb 是未压缩，用 gltfLoader 加载即可
-
-    const modelObject3D = new THREE.Object3D();
-    // let mixer: any = null;
-    let modelMixer: any = [];
-    const loader = new GLTFLoader();
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath("/draco/");
-    loader.setDRACOLoader(dracoLoader);
-
-    // loader.load("/models/coneUncompression.glb", (glb) => {
-    loader.load("/models/cone.glb", (glb) => {
-      label2dData.forEach((item: any) => {
-        // console.log(item, "0-0-0-");
-        const { featureCenterCoord } = item;
-        const clonedModel = glb.scene.clone();
-        const mixer = new THREE.AnimationMixer(clonedModel);
-        const clonedAnimations = glb.animations.map((clip) => {
-          return clip.clone();
-        });
-        clonedAnimations.forEach((clip) => {
-          mixer.clipAction(clip).play();
-        });
-
-        // 添加每个model的mixer
-        modelMixer.push(mixer);
-
-        // 设置模型位置
-        clonedModel.position.set(
-          featureCenterCoord[0],
-          -featureCenterCoord[1],
-          mapConfig.spotZIndex
-        );
-        // 设置模型大小
-        clonedModel.scale.set(0.3, 0.3, 0.6);
-        // clonedModel.rotateX(-Math.PI / 8);
-        modelObject3D.add(clonedModel);
-      });
-
-      mapObject3D.add(modelObject3D);
-    });
-
-    /**
-     * 绘制连线（随机生成两个点位）
-     */
-    const MAX_LINE_COUNT = 5; // 随机生成5组线
-    let connectLine: any[] = [];
-    for (let count = 0; count < MAX_LINE_COUNT; count++) {
-      const midIndex = Math.floor(label2dData.length / 2);
-      const indexStart = Math.floor(Math.random() * midIndex);
-      const indexEnd = Math.floor(Math.random() * midIndex) + midIndex - 1;
-      connectLine.push({
-        indexStart,
-        indexEnd,
-      });
-    }
-
-    /**
-     * 绘制飞行的点
-     */
-    const flyObject3D = new THREE.Object3D();
-    const flySpotList: any = [];
-    connectLine.forEach((item: any) => {
-      const { indexStart, indexEnd } = item;
-      const { flyLine, flySpot } = drawLineBetween2Spot(
-        label2dData[indexStart].featureCenterCoord,
-        label2dData[indexEnd].featureCenterCoord
-      );
-      flyObject3D.add(flyLine);
-      flyObject3D.add(flySpot);
-      flySpotList.push(flySpot);
-    });
-    mapObject3D.add(flyObject3D);
-
-    /**
-     * 绘制雷达
-     */
-    // radarData.forEach((item: RadarOption) => {
-    //   const planeMesh = drawRadar(item, ratio);
-    //   scene.add(planeMesh);
-    // });
-
-    /**
-     * 初始化 CameraHelper
-     */
-    // scene.add(cameraHelper);
-
-    /**
-     * 初始化 AxesHelper
-     */
-    // const axesHelper = new THREE.AxesHelper(100);
-    // scene.add(axesHelper);
+    // 异步初始化默认元素
+    initDefaultElements().catch(console.error);
 
     /**
      * 初始化控制器
      */
-    // new OrbitControls(camera, renderer.domElement);
     new OrbitControls(camera, labelRenderer.domElement);
 
     /**
@@ -222,10 +163,6 @@ function Map3D(props: Props) {
     const light = new THREE.PointLight(0xffffff, 1.5);
     light.position.set(0, -5, 30);
     scene.add(light);
-
-    // 光源辅助线
-    // const lightHelper = new THREE.PointLightHelper(light);
-    // scene.add(lightHelper);
 
     // 视窗伸缩
     const onResizeEvent = () => {
@@ -254,17 +191,12 @@ function Map3D(props: Props) {
 
       // 如果存在，则鼠标移出需要重置
       if (lastPick) {
-        // lastPick.object.material[0].color.set(mapConfig.mapColor);
-
         const color = mapConfig.mapColorGradient[Math.floor(Math.random() * 4)];
         lastPick.object.material[0].color.set(color);
-        lastPick.object.material[0].opacity = mapConfig.mapOpacity; // 设置完全不透明
+        lastPick.object.material[0].opacity = mapConfig.mapOpacity;
       }
       lastPick = null;
-      // lastPick = intersects.find(
-      //   (item: any) => item.object.material && item.object.material.length === 2
-      // );
-      // 优化
+      
       lastPick = intersects.find(
         (item: any) => item.object.userData.isChangeColor
       );
@@ -273,7 +205,7 @@ function Map3D(props: Props) {
         const properties = lastPick.object.parent.customProperties;
         if (lastPick.object.material[0]) {
           lastPick.object.material[0].color.set(mapConfig.mapHoverColor);
-          lastPick.object.material[0].opacity = 1; // 设置完全不透明
+          lastPick.object.material[0].opacity = 1;
         }
 
         if (toolTipRef.current && toolTipRef.current.style) {
@@ -311,18 +243,13 @@ function Map3D(props: Props) {
      * Animate
      */
     const clock = new THREE.Clock();
-    let previousTime = 0;
     const animate = function () {
-      // const elapsedTime = clock.getElapsedTime();
-      // const deltaTime = elapsedTime - previousTime;
-      // previousTime = elapsedTime;
-
-      // Update mixer
-      // mixer?.update(deltaTime);
       const delta = clock.getDelta();
-      modelMixer.map((item: any) => item.update(delta));
+      
+      // 更新地图管理器中的动画
+      mapManager.updateAnimations(delta);
 
-      // 雷达
+      // 雷达动画（如果需要的话）
       ratio.value += 0.01;
 
       requestAnimationFrame(animate);
@@ -330,26 +257,6 @@ function Map3D(props: Props) {
       raycaster.setFromCamera(pointer, camera);
       renderer.render(scene, camera);
       labelRenderer.render(scene, camera);
-
-      // 圆环
-      spotList.forEach((mesh: any) => {
-        mesh._s += 0.01;
-        mesh.scale.set(1 * mesh._s, 1 * mesh._s, 1 * mesh._s);
-        if (mesh._s <= 2) {
-          mesh.material.opacity = 2 - mesh._s;
-        } else {
-          mesh._s = 1;
-        }
-      });
-
-      // 飞行的圆点
-      flySpotList.forEach(function (mesh: any) {
-        mesh._s += 0.003;
-        let tankPosition = new THREE.Vector3();
-        // getPointAt() 根据弧长在曲线上的位置。必须在范围[0，1]内。
-        tankPosition = mesh.curve.getPointAt(mesh._s % 1);
-        mesh.position.set(tankPosition.x, tankPosition.y, tankPosition.z);
-      });
     };
     animate();
 
@@ -358,11 +265,15 @@ function Map3D(props: Props) {
     window.addEventListener("dblclick", onDblclickEvent, false);
 
     return () => {
+      // 清理资源
+      mapManager.dispose();
+      mapManagerRef.current = null;
+      
       window.removeEventListener("resize", onResizeEvent);
       window.removeEventListener("mousemove", onMouseMoveEvent);
       window.removeEventListener("dblclick", onDblclickEvent);
     };
-  }, [geoJson]);
+  }, [geoJson, dblClickFn, projectionFnParam]);
 
   return (
     <div
@@ -378,6 +289,8 @@ function Map3D(props: Props) {
       <ToolTip innterRef={toolTipRef} data={toolTipData}></ToolTip>
     </div>
   );
-}
+});
+
+Map3D.displayName = 'Map3D';
 
 export default Map3D;

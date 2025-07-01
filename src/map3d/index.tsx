@@ -194,21 +194,21 @@ function Map3D(props: Props) {
     /**
      * 绘制雷达
      */
-    radarData.forEach((item: RadarOption) => {
-      const planeMesh = drawRadar(item, ratio);
-      scene.add(planeMesh);
-    });
+    // radarData.forEach((item: RadarOption) => {
+    //   const planeMesh = drawRadar(item, ratio);
+    //   scene.add(planeMesh);
+    // });
 
     /**
      * 初始化 CameraHelper
      */
-    scene.add(cameraHelper);
+    // scene.add(cameraHelper);
 
     /**
      * 初始化 AxesHelper
      */
-    const axesHelper = new THREE.AxesHelper(100);
-    scene.add(axesHelper);
+    // const axesHelper = new THREE.AxesHelper(100);
+    // scene.add(axesHelper);
 
     /**
      * 初始化控制器
@@ -224,8 +224,8 @@ function Map3D(props: Props) {
     scene.add(light);
 
     // 光源辅助线
-    const lightHelper = new THREE.PointLightHelper(light);
-    scene.add(lightHelper);
+    // const lightHelper = new THREE.PointLightHelper(light);
+    // scene.add(lightHelper);
 
     // 视窗伸缩
     const onResizeEvent = () => {

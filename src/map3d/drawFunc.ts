@@ -125,6 +125,17 @@ export function generateMapObject3D(
 
   const { center, scale } = projectionFnParam;
 
+  // 验证投影参数
+  if (!center || !Array.isArray(center) || center.length !== 2) {
+    console.error('Invalid projection center:', center);
+    throw new Error('投影中心点参数无效');
+  }
+
+  if (typeof scale !== 'number' || scale <= 0) {
+    console.error('Invalid projection scale:', scale);
+    throw new Error('投影缩放参数无效');
+  }
+
   const projectionFn = d3
     .geoMercator()
     .center(center)

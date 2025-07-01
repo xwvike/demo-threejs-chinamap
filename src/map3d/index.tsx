@@ -34,6 +34,10 @@ export interface Map3DRef {
   addElements: (elements: any[]) => Promise<void>;
   removeElements: (ids: string[]) => void;
   clearElements: () => void;
+  highlightRegion: (regionName: string, duration?: number) => boolean;
+  clearRegionHighlight: (regionName: string) => boolean;
+  clearAllHighlights: () => void;
+  getHighlightedRegions: () => string[];
 }
 
 let lastPick: any = null;
@@ -68,12 +72,44 @@ const Map3D = forwardRef<Map3DRef, Props>((props, ref) => {
     }
   }, []);
 
+  // 高亮区域相关方法
+  const highlightRegion = useCallback((regionName: string, duration?: number) => {
+    if (mapManagerRef.current) {
+      return mapManagerRef.current.highlightRegion(regionName, duration);
+    }
+    return false;
+  }, []);
+
+  const clearRegionHighlight = useCallback((regionName: string) => {
+    if (mapManagerRef.current) {
+      return mapManagerRef.current.clearRegionHighlight(regionName);
+    }
+    return false;
+  }, []);
+
+  const clearAllHighlights = useCallback(() => {
+    if (mapManagerRef.current) {
+      mapManagerRef.current.clearAllHighlights();
+    }
+  }, []);
+
+  const getHighlightedRegions = useCallback(() => {
+    if (mapManagerRef.current) {
+      return mapManagerRef.current.getHighlightedRegions();
+    }
+    return [];
+  }, []);
+
   // 使用 useImperativeHandle 暴露方法给父组件
   useImperativeHandle(ref, () => ({
     addElements: addMapElements,
     removeElements: removeMapElements,
     clearElements: clearAllMapElements,
-  }), [addMapElements, removeMapElements, clearAllMapElements]);
+    highlightRegion,
+    clearRegionHighlight,
+    clearAllHighlights,
+    getHighlightedRegions,
+  }), [addMapElements, removeMapElements, clearAllMapElements, highlightRegion, clearRegionHighlight, clearAllHighlights, getHighlightedRegions]);
 
   useEffect(() => {
     const currentDom = mapRef.current;
@@ -119,6 +155,11 @@ const Map3D = forwardRef<Map3DRef, Props>((props, ref) => {
     /**
      * 初始化地图3D模型（只包含地图本身）
      */
+    if (!projectionFnParam || !projectionFnParam.center || !projectionFnParam.scale) {
+      console.error('Invalid projectionFnParam:', projectionFnParam);
+      return;
+    }
+
     const { mapObject3D, label2dData } = generateMapObject3D(
       geoJson,
       projectionFnParam

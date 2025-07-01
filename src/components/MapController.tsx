@@ -124,6 +124,42 @@ const MapController: React.FC<MapControllerProps> = ({
     }
   };
 
+  // 高亮指定区域
+  const highlightRandomProvince = () => {
+    // 一些常见的省份名称用于测试
+    const provinces = ['北京市', '上海市', '广东省', '江苏省', '浙江省', '山东省', '河南省', '四川省', '湖北省', '湖南省'];
+    const randomProvince = provinces[Math.floor(Math.random() * provinces.length)];
+    
+    if (mapRef.current?.highlightRegion) {
+      const success = mapRef.current.highlightRegion(randomProvince, 3000);
+      if (success) {
+        console.log(`高亮区域: ${randomProvince}`);
+      } else {
+        console.warn(`未找到区域: ${randomProvince}`);
+      }
+    }
+  };
+
+  // 高亮特定省份
+  const highlightSpecificProvince = (provinceName: string) => {
+    if (mapRef.current?.highlightRegion) {
+      const success = mapRef.current.highlightRegion(provinceName, 3000);
+      if (success) {
+        console.log(`高亮区域: ${provinceName}`);
+      } else {
+        console.warn(`未找到区域: ${provinceName}`);
+      }
+    }
+  };
+
+  // 清除所有高亮
+  const clearAllHighlights = () => {
+    if (mapRef.current?.clearAllHighlights) {
+      mapRef.current.clearAllHighlights();
+      console.log('已清除所有高亮区域');
+    }
+  };
+
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
       {/* 控制面板 */}
@@ -197,6 +233,86 @@ const MapController: React.FC<MapControllerProps> = ({
           >
             清空所有元素
           </button>
+        </div>
+        
+        {/* 高亮区域控制 */}
+        <div style={{ borderTop: '1px solid #444', paddingTop: '10px', marginTop: '15px' }}>
+          <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#ccc' }}>区域高亮</h4>
+          
+          <div style={{ marginBottom: '10px' }}>
+            <button
+              onClick={highlightRandomProvince}
+              style={{
+                background: '#FF9800',
+                color: 'white',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                width: '100%',
+                marginBottom: '8px',
+              }}
+            >
+              高亮随机省份
+            </button>
+          </div>
+          
+          <div style={{ marginBottom: '10px' }}>
+            <button
+              onClick={() => highlightSpecificProvince('北京市')}
+              style={{
+                background: '#9C27B0',
+                color: 'white',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                width: '100%',
+                marginBottom: '8px',
+              }}
+            >
+              高亮北京市
+            </button>
+          </div>
+          
+          <div style={{ marginBottom: '10px' }}>
+            <button
+              onClick={() => highlightSpecificProvince('广东省')}
+              style={{
+                background: '#9C27B0',
+                color: 'white',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                width: '100%',
+                marginBottom: '8px',
+              }}
+            >
+              高亮广东省
+            </button>
+          </div>
+          
+          <div style={{ marginBottom: '10px' }}>
+            <button
+              onClick={clearAllHighlights}
+              style={{
+                background: '#607D8B',
+                color: 'white',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                width: '100%',
+              }}
+            >
+              清除高亮
+            </button>
+          </div>
         </div>
         
         <div style={{ fontSize: '12px', color: '#ccc', marginTop: '10px' }}>

@@ -39,10 +39,19 @@ function App() {
 
   // 双击事件
   const dblClickFn = (customProperties: any) => {
+    console.log('Double click properties:', customProperties);
+    
+    // 确保 centroid 存在，否则使用 center 或默认值
+    const centerCoords = customProperties.centroid || 
+                        customProperties.center || 
+                        [104.0, 37.5]; // 默认中心点
+    
+    const scale = MapScale[customProperties.level] || 40; // 默认缩放
+    
     setMapAdCode(customProperties.adcode);
     setProjectionFnParam({
-      center: customProperties.centroid,
-      scale: MapScale[customProperties.level],
+      center: centerCoords,
+      scale: scale,
     });
   };
 

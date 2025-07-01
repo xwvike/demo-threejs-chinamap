@@ -261,7 +261,7 @@ const Map3D = forwardRef<Map3DRef, Props>((props, ref) => {
     animate();
 
     window.addEventListener("resize", onResizeEvent, false);
-    window.addEventListener("mousemove", onMouseMoveEvent, false);
+    // window.addEventListener("mousemove", onMouseMoveEvent, false);
     window.addEventListener("dblclick", onDblclickEvent, false);
 
     return () => {
@@ -270,7 +270,7 @@ const Map3D = forwardRef<Map3DRef, Props>((props, ref) => {
       mapManagerRef.current = null;
       
       window.removeEventListener("resize", onResizeEvent);
-      window.removeEventListener("mousemove", onMouseMoveEvent);
+      // window.removeEventListener("mousemove", onMouseMoveEvent);
       window.removeEventListener("dblclick", onDblclickEvent);
     };
   }, [geoJson, dblClickFn, projectionFnParam]);

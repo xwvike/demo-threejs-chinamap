@@ -27,7 +27,7 @@ function App() {
   // 请求地图数据
   const queryMapData = useCallback(async (code: number) => {
     const response = await axios.get(
-      `https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`
+      `/geojson/${code}_full.json`
     );
     const { data } = response;
     setGeoJson(data);

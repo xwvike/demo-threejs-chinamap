@@ -85,7 +85,7 @@ const MapController: React.FC<MapControllerProps> = ({
           id: `${spotId}-model`,
           type: 'model' as const,
           position,
-          modelPath: '/models/cone.glb',
+          modelPath: './models/cone.glb',
           scale: [0.4, 0.4, 0.8] as [number, number, number],
           animation: true,
         },

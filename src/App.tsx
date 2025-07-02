@@ -27,7 +27,7 @@ function App() {
   // 请求地图数据
   const queryMapData = useCallback(async (code: number) => {
     const response = await axios.get(
-      `/geojson/${code}_full.json`
+      `https://web.xtjzx.cn/app/chinamap3d/geojson/${code}_full.json`
     );
     const { data } = response;
     setGeoJson(data);

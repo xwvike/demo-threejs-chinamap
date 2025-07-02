@@ -89,7 +89,7 @@ export class MapManager {
   private initLoaders() {
     this.gltfLoader = new GLTFLoader();
     this.dracoLoader = new DRACOLoader();
-    this.dracoLoader.setDecoderPath("/draco/");
+    this.dracoLoader.setDecoderPath("./draco/");
     this.gltfLoader.setDRACOLoader(this.dracoLoader);
   }
 

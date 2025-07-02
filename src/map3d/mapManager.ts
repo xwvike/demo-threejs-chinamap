@@ -148,6 +148,21 @@ export class MapManager {
           } else {
             clonedModel.scale.set(0.3, 0.3, 0.6);
           }
+          // 将模型材质改为红色
+                clonedModel.traverse((child) => {
+                    if ((child as THREE.Mesh).isMesh) {
+                        const mesh = child as THREE.Mesh;
+                        if (Array.isArray(mesh.material)) {
+                            mesh.material.forEach((mat) => {
+                                if ((mat as THREE.Material).hasOwnProperty('color')) {
+                                    (mat as any).color.set(0xff0000);
+                                }
+                            });
+                        } else if ((mesh.material as any).color) {
+                            (mesh.material as any).color.set(0xff0000);
+                        }
+                    }
+                });
           
           // 处理动画
           if (element.animation && glb.animations.length > 0) {

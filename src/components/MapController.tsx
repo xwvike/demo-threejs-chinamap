@@ -86,7 +86,7 @@ const MapController: React.FC<MapControllerProps> = ({
           type: 'model' as const,
           position,
           modelPath: '/models/cone.glb',
-          scale: [0.2, 0.2, 0.4] as [number, number, number],
+          scale: [0.4, 0.4, 0.8] as [number, number, number],
           animation: true,
         },
       ];

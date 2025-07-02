@@ -1,4 +1,4 @@
-const Depth = 6;
+const Depth = 5;
 
 export const mapConfig = {
   // 地图挤出厚度
@@ -16,8 +16,8 @@ export const mapConfig = {
   mapSideColor2: "#266BF0",
   // 上面的line
   topLineColor: 0x41c0fb,
-  topLineWidth: 3,
-  topLineZIndex: Depth + 0.5,
+  topLineWidth: 1,
+  topLineZIndex: Depth + 0.1,
   // label 2d高度
   label2dZIndex: Depth + 2,
   // spot

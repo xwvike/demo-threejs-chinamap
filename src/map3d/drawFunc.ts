@@ -212,21 +212,21 @@ export function generateElementsData(label2dData: any[]) {
     });
     
     // 生成点位元素
-    elements.push({
-      id: `spot-${index}`,
-      type: 'spot',
-      position: featureCenterCoord,
-    });
+    // elements.push({
+    //   id: `spot-${index}`,
+    //   type: 'spot',
+    //   position: featureCenterCoord,
+    // });
     
     // 生成模型元素
-    elements.push({
-      id: `model-${index}`,
-      type: 'model',
-      position: featureCenterCoord,
-      modelPath: '/models/cone.glb',
-      scale: [0.3, 0.3, 0.6],
-      animation: true,
-    });
+    // elements.push({
+    //   id: `model-${index}`,
+    //   type: 'model',
+    //   position: featureCenterCoord,
+    //   modelPath: '/models/cone.glb',
+    //   scale: [0.3, 0.3, 0.6],
+    //   animation: true,
+    // });
   });
   
   return elements;
@@ -288,7 +288,7 @@ export function generateMapSpot(label2dData: any) {
 export const draw2dLabel = (coord: [number, number], proviceName: string) => {
   if (coord && coord.length) {
     // 模版字符串
-    const innerHTML = `<div class="your-classname" style="color: #fff">${proviceName}</div>`;
+    const innerHTML = `<div class="your-classname" style="color: #fff;font-size:12px">${proviceName}</div>`;
     const labelDiv = document.createElement("div");
     labelDiv.innerHTML = innerHTML;
     labelDiv.style.pointerEvents = "none"; // 禁用事件

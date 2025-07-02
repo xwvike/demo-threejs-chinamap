@@ -303,7 +303,7 @@ const Map3D = forwardRef<Map3DRef, Props>((props, ref) => {
 
     window.addEventListener("resize", onResizeEvent, false);
     // window.addEventListener("mousemove", onMouseMoveEvent, false);
-    window.addEventListener("dblclick", onDblclickEvent, false);
+    // window.addEventListener("dblclick", onDblclickEvent, false);
 
     return () => {
       // 清理资源
@@ -312,7 +312,7 @@ const Map3D = forwardRef<Map3DRef, Props>((props, ref) => {
       
       window.removeEventListener("resize", onResizeEvent);
       // window.removeEventListener("mousemove", onMouseMoveEvent);
-      window.removeEventListener("dblclick", onDblclickEvent);
+      // window.removeEventListener("dblclick", onDblclickEvent);
     };
   }, [geoJson, dblClickFn, projectionFnParam]);
 

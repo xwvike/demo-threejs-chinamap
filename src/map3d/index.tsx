@@ -131,7 +131,8 @@ const Map3D = forwardRef<Map3DRef, Props>((props, ref) => {
     /**
      * 初始化渲染器
      */
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setClearColor(0x000000, 0);
     renderer.setSize(currentDom.clientWidth, currentDom.clientHeight);
     
     if (currentDom.childNodes[0]) {

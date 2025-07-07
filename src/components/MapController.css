@@ -1,0 +1,27 @@
+.fb {
+  position: fixed;
+  width: 200px;
+  height: 152px;
+  bottom: 120px;
+  z-index: 1000;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 36px;
+  padding-bottom: 20px;
+box-sizing: border-box;
+}
+.jrfb {
+  left: 110px;
+  background-image: url("../assets/ljfb.png");
+}
+.ljfb {
+  left: 370px;
+  background-image: url("../assets/jrfb.png");
+}

@@ -184,7 +184,7 @@ const Map3D = forwardRef<Map3DRef, Props>((props, ref) => {
     const initDefaultElements = async () => {
       // 生成基础元素数据
       const elementsData = generateElementsData(label2dData);
-      const lineElementsData = generateLineElementsData(label2dData, 5);
+      const lineElementsData = generateLineElementsData(label2dData, 0);
       console.log(elementsData)
       
       // 添加所有元素

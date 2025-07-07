@@ -4,6 +4,10 @@ import Map3D, { Map3DRef } from "../map3d";
 import { GeoJsonType } from "../map3d/typed";
 import { LineElement } from "../map3d/mapManager";
 import bg from "../assets/bg.png";
+import jrfb from "../assets/jrfb.png";
+import ljfb from "../assets/ljfb.png";
+import Danmaku from "./Danmaku";
+import "./MapController.css";
 
 interface MapControllerProps {
   geoJson: GeoJsonType;
@@ -16,9 +20,9 @@ const MapController: React.FC<MapControllerProps> = ({
   dblClickFn,
   projectionFnParam,
 }) => {
+  const danmakuRef = useRef<any>(null);
   const mapRef = useRef<Map3DRef>(null);
   const [elementCount, setElementCount] = useState(0);
-
   // 中国地图坐标范围（经纬度）
   const CHINA_BOUNDS = {
     minLng: 73.5, // 最西端
@@ -59,7 +63,7 @@ const MapController: React.FC<MapControllerProps> = ({
   };
 
   // 合并的点位创建（包含标签、点位和模型）
-  const addIntegratedSpot = () => {
+  const addIntegratedSpot = (title:string) => {
     if (mapRef.current?.addElements) {
       const position = generateRandomPositionInChina();
       const timestamp = Date.now();
@@ -71,7 +75,7 @@ const MapController: React.FC<MapControllerProps> = ({
           id: `${spotId}-label`,
           type: "label" as const,
           position,
-          text: `综合点位 ${elementCount + 1}`,
+          text: `${title}`,
         },
         // 点位
         {
@@ -171,6 +175,15 @@ const MapController: React.FC<MapControllerProps> = ({
     }
   };
 
+  // 创建点位，同时创建弹幕
+  const createSpotAndDanmaku = () => {
+    const title = `综合点位 ${elementCount + 1}`;
+    addIntegratedSpot(title);
+    if (danmakuRef.current) {
+      danmakuRef.current.addDanmaku(`${title}`);
+    }
+  };
+
   return (
     <div
       style={{
@@ -180,194 +193,20 @@ const MapController: React.FC<MapControllerProps> = ({
         backgroundImage: `url(${bg})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        overflow: "hidden",
       }}
     >
-      {/* 控制面板 */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20px",
-          left: "20px",
-          zIndex: 1000,
-          background: "rgba(0, 0, 0, 0.8)",
-          padding: "15px",
-          borderRadius: "8px",
-          color: "white",
-          minWidth: "200px",
-        }}
-      >
-        <h3 style={{ margin: "0 0 15px 0", fontSize: "16px" }}>地图元素控制</h3>
-
-        <div style={{ marginBottom: "10px" }}>
-          <button
-            onClick={addIntegratedSpot}
-            style={{
-              background: "#4CAF50",
-              color: "white",
-              border: "none",
-              padding: "10px 16px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              marginRight: "8px",
-              fontSize: "12px",
-              width: "100%",
-              marginBottom: "8px",
-            }}
-          >
-            添加点位
-          </button>
-        </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <button
-            onClick={addLineToInnerMongolia}
-            style={{
-              background: "#2196F3",
-              color: "white",
-              border: "none",
-              padding: "10px 16px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "12px",
-              width: "100%",
-              marginBottom: "8px",
-            }}
-          >
-            添加连线
-          </button>
-        </div>
-
-        <div style={{ marginBottom: "10px" }}>
-          <button
-            onClick={clearAllElements}
-            style={{
-              background: "#F44336",
-              color: "white",
-              border: "none",
-              padding: "10px 16px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "12px",
-              width: "100%",
-            }}
-          >
-            清空所有元素
-          </button>
-        </div>
-
-        {/* 高亮区域控制 */}
-        <div
-          style={{
-            borderTop: "1px solid #444",
-            paddingTop: "10px",
-            marginTop: "15px",
-          }}
-        >
-          <h4 style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#ccc" }}>
-            区域高亮
-          </h4>
-
-          <div style={{ marginBottom: "10px" }}>
-            <button
-              onClick={highlightRandomProvince}
-              style={{
-                background: "#FF9800",
-                color: "white",
-                border: "none",
-                padding: "10px 16px",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "12px",
-                width: "100%",
-                marginBottom: "8px",
-              }}
-            >
-              高亮随机省份
-            </button>
-          </div>
-
-          <div style={{ marginBottom: "10px" }}>
-            <button
-              onClick={() => highlightSpecificProvince("北京市")}
-              style={{
-                background: "#9C27B0",
-                color: "white",
-                border: "none",
-                padding: "10px 16px",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "12px",
-                width: "100%",
-                marginBottom: "8px",
-              }}
-            >
-              高亮北京市
-            </button>
-          </div>
-
-          <div style={{ marginBottom: "10px" }}>
-            <button
-              onClick={() => highlightSpecificProvince("广东省")}
-              style={{
-                background: "#9C27B0",
-                color: "white",
-                border: "none",
-                padding: "10px 16px",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "12px",
-                width: "100%",
-                marginBottom: "8px",
-              }}
-            >
-              高亮广东省
-            </button>
-          </div>
-
-          <div style={{ marginBottom: "10px" }}>
-            <button
-              onClick={clearAllHighlights}
-              style={{
-                background: "#607D8B",
-                color: "white",
-                border: "none",
-                padding: "10px 16px",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "12px",
-                width: "100%",
-              }}
-            >
-              清除高亮
-            </button>
-          </div>
-        </div>
-
-        <div style={{ fontSize: "12px", color: "#ccc", marginTop: "10px" }}>
-          当前元素数量: {elementCount}
-        </div>
-
-        <div
-          style={{
-            fontSize: "10px",
-            color: "#999",
-            marginTop: "8px",
-            lineHeight: "1.4",
-          }}
-        >
-          <div>• 综合点位：在中国地图范围内随机创建</div>
-          <div>• 连线：起点随机，终点固定为内蒙古</div>
-        </div>
-      </div>
-
       {/* 3D地图 */}
       <div
         style={{
           position: "absolute",
-          top: "171px",
+          top: "174px",
           left: "42px",
-          width: "1366px",
-          height: "858px",
+          width: "min(1366px, calc(100vw - 84px))",
+          height: "min(858px, calc(100vh - 174px - 20px))",
+          maxWidth: "1366px",
+          maxHeight: "858px",
         }}
       >
         <Map3D
@@ -377,7 +216,12 @@ const MapController: React.FC<MapControllerProps> = ({
           projectionFnParam={projectionFnParam}
         />
       </div>
-      <div></div>
+      <button style={{position:'fixed', top: '200px'}} onClick={createSpotAndDanmaku}>
+        add
+      </button>
+      <div className="fb jrfb">23</div>
+      <div className="fb ljfb">3454</div>
+      <Danmaku ref={danmakuRef} />
     </div>
   );
 };

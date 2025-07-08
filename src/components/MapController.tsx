@@ -70,10 +70,10 @@ const MapController: React.FC<MapControllerProps> = ({
       const spotId = `integrated-spot-${timestamp}`;
 
       const newElements = [
-        // 标签
+        // 气泡
         {
-          id: `${spotId}-label`,
-          type: "label" as const,
+          id: `${spotId}-bubble`,
+          type: "bubble" as const,
           position,
           text: `${title}`,
         },

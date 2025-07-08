@@ -298,6 +298,81 @@ export const draw2dLabel = (coord: [number, number], proviceName: string) => {
   }
 };
 
+// 绘制气泡标签
+export const draw2dBubble = (coord: [number, number], text: string, options?: {
+  bgColor?: string;
+  textColor?: string;
+  borderColor?: string;
+  fontSize?: number;
+}) => {
+  if (coord && coord.length) {
+    const {
+      bgColor = "#1a1a1a",
+      textColor = "#ffffff",
+      borderColor = "#00d4ff",
+      fontSize = 12
+    } = options || {};
+
+    // 创建SVG背景
+    const svgBg = `
+      <svg width="120" height="36" viewBox="0 0 120 36" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bubbleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${bgColor};stop-opacity:0.9" />
+            <stop offset="100%" style="stop-color:${bgColor};stop-opacity:0.7" />
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge> 
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <rect x="2" y="2" width="116" height="24" rx="12" ry="12" 
+              fill="url(#bubbleGradient)" 
+              stroke="${borderColor}" 
+              stroke-width="1" 
+              filter="url(#glow)"/>
+      </svg>
+    `;
+
+    const bubbleDiv = document.createElement("div");
+    bubbleDiv.style.position = "relative";
+    bubbleDiv.style.pointerEvents = "none";
+    bubbleDiv.style.filter = "drop-shadow(0 4px 8px rgba(0, 212, 255, 0.3))";
+    
+    bubbleDiv.innerHTML = `
+      <div style="position: relative; display: inline-block;">
+        ${svgBg}
+        <div style="
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          width: 116px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: ${textColor};
+          font-size: ${fontSize}px;
+          font-weight: 500;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          padding: 0 8px;
+          box-sizing: border-box;
+        ">${text}</div>
+      </div>
+    `;
+
+    const bubbleObject = new CSS2DObject(bubbleDiv);
+    bubbleObject.position.set(coord[0], -coord[1], mapConfig.label2dZIndex + 0.1);
+    return bubbleObject;
+  }
+};
+
 // 绘制圆点
 export const drawSpot = (coord: [number, number]) => {
   if (coord && coord.length) {

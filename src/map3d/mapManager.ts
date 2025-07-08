@@ -1,14 +1,14 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
-import { drawLineBetween2Spot, draw2dLabel, drawSpot } from "./drawFunc";
+import { drawLineBetween2Spot, draw2dLabel, drawSpot, draw2dBubble } from "./drawFunc";
 import { mapConfig } from "./mapConfig";
 import { ExtendObject3D } from "./typed";
 
 // 地图元素类型定义
 export interface MapElement {
   id: string;
-  type: 'label' | 'spot' | 'model' | 'line';
+  type: 'label' | 'spot' | 'model' | 'line' | 'bubble';
   position: [number, number];
   data?: any;
   object3D?: THREE.Object3D;
@@ -100,6 +100,19 @@ export class MapManager {
       if (labelObject) {
         element.object3D = labelObject;
         this.labelsContainer.add(labelObject);
+        this.elements.set(element.id, element);
+      }
+      resolve();
+    });
+  }
+
+  // 添加气泡标签
+  addBubble(element: LabelElement): Promise<void> {
+    return new Promise((resolve) => {
+      const bubbleObject = draw2dBubble(element.position, element.text);
+      if (bubbleObject) {
+        element.object3D = bubbleObject;
+        this.labelsContainer.add(bubbleObject);
         this.elements.set(element.id, element);
       }
       resolve();
@@ -260,6 +273,8 @@ export class MapManager {
       switch (element.type) {
         case 'label':
           return this.addLabel(element as LabelElement);
+        case 'bubble':
+          return this.addBubble(element as LabelElement);
         case 'spot':
           return this.addSpot(element as SpotElement);
         case 'model':

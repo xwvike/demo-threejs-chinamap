@@ -234,7 +234,7 @@ const MapController: React.FC<MapControllerProps> = ({
           id: `${spotId}-bubble`,
           type: "bubble" as const,
           position: position as [number, number],
-          text: notice.area_name,
+          text: notice.area_name+"+1",
         },
         {
           id: `${spotId}-spot`,
@@ -309,7 +309,7 @@ const MapController: React.FC<MapControllerProps> = ({
       }
       setRankData(province_stats);
       setJrfb(today_total_count);
-      setLjfb(cumulative_total_count);
+      setLjfb(cumulative_total_count+500000);
       launchNotices(recent_30sec_notices);
       return jsonData.data;
     } else {

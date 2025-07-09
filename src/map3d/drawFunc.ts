@@ -209,7 +209,7 @@ export function generateElementsData(label2dData: any[]) {
       id: `label-${index}`,
       type: 'label',
       position: featureCenterCoord,
-      text: featureName,
+      text: featureName.replace('特别行政区', ''),
     });
     
     // 生成点位元素

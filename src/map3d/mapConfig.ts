@@ -19,7 +19,7 @@ export const mapConfig = {
   topLineWidth: 1,
   topLineZIndex: Depth + 0.1,
   // label 2d高度
-  label2dZIndex: Depth + 2,
+  label2dZIndex: Depth + 1,
   // spot
   spotZIndex: Depth + 0.2,
 };

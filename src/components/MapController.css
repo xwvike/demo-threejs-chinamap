@@ -1,5 +1,5 @@
 .fb {
-  position: fixed;
+  position: absolute;
   width: 200px;
   height: 152px;
   bottom: 120px;
@@ -15,13 +15,121 @@
   color: #fff;
   font-size: 36px;
   padding-bottom: 20px;
-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .jrfb {
   left: 110px;
-  background-image: url("../assets/ljfb.png");
+  background-image: url("../assets/jrfb.png");
 }
 .ljfb {
   left: 370px;
-  background-image: url("../assets/jrfb.png");
+  background-image: url("../assets/ljfb.png");
+}
+.rank {
+    position: absolute;
+    width: 420px;
+    right: 49px;
+    top: 274px;
+    height: 750px;
+    overflow-y: auto;
+}
+.rank::-webkit-scrollbar {
+    width: 2px;
+}
+.rank::-webkit-scrollbar-track {
+    background: transparent;
+}
+.rank::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 1px;
+}
+.rank::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+.rank-item {
+  width: 100%;
+  display: block;
+  height: 50px;
+  background: rgba(14, 95, 255, 0.2);
+  display: flex;
+  padding: 0 48px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+}
+.index {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.index-0 {
+  background: rgba(248, 221, 108, 0.38);
+  border: 1px solid #f8dd6c;
+}
+.index-1 {
+  background: rgba(255, 255, 255, 0.38);
+  border: 1px solid #fff;
+}
+.index-2 {
+  background: rgba(255, 255, 255, 0.38);
+  border: 1px solid #fff;
+}
+.rank-item:nth-child(2n) {
+  background: rgba(14, 95, 255, 0.3);
+}
+.fullscreen-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  border-radius: 5px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1000;
+  padding: 0;
+  transition: background-color 0.3s ease;
+}
+
+.reload-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 70px; /* 位于全屏按钮左侧 */
+  background: rgba(0, 0, 0, 0.3);
+  border: none;
+  border-radius: 5px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1000;
+  padding: 0;
+  transition: background-color 0.3s ease;
+}
+
+.fullscreen-btn:hover, .reload-btn:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.fullscreen-btn svg, .reload-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.fullscreen-btn:hover svg, .reload-btn:hover svg {
+  transform: scale(1.1);
+}
+.time{
+    position: absolute;
+    left: 1620px;
+    top: 65px;
+    color: rgba(255, 255, 255, 0.7);
 }

@@ -231,6 +231,9 @@ export class MapManager {
 
     // 从对应容器中移除
     switch (element.type) {
+      case 'bubble':
+        this.labelsContainer.remove(element.object3D);
+        break;
       case 'label':
         this.labelsContainer.remove(element.object3D);
         break;

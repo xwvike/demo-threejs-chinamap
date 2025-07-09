@@ -352,6 +352,7 @@ export const draw2dBubble = (coord: [number, number], text: string, options?: {
           width: 116px;
           height: 24px;
           display: flex;
+          z-index: 9999;
           align-items: center;
           justify-content: center;
           color: ${textColor};
@@ -368,7 +369,7 @@ export const draw2dBubble = (coord: [number, number], text: string, options?: {
     `;
 
     const bubbleObject = new CSS2DObject(bubbleDiv);
-    bubbleObject.position.set(coord[0], -coord[1], mapConfig.label2dZIndex + 0.1);
+    bubbleObject.position.set(coord[0], -coord[1], mapConfig.label2dZIndex + 1);
     return bubbleObject;
   }
 };

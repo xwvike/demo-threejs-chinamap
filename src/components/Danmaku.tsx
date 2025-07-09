@@ -7,47 +7,66 @@ import React, {
 } from "react";
 import "./Danmaku.css"; // 确保有对应的CSS文件来处理弹幕样式
 
-const getRandomExcluding = (min, max, exclude) => {
-  let random;
+const getRandomExcluding = (min: number, max: number, exclude: number[]): number => {
+  let random: number;
   do {
     random = Math.floor(Math.random() * (max - min + 1)) + min;
-  } while (random === exclude);
+  } while (exclude.includes(random));
   return random;
 };
 
-const Danmaku = forwardRef((props, ref) => {
+interface DanmakuItem {
+  text: string;
+}
+
+interface DanmakuProps {
+  initDanmu?: DanmakuItem[];
+}
+
+interface DanmakuRef {
+  addDanmaku: (text: string) => void;
+}
+
+
+const Danmaku = forwardRef<DanmakuRef, DanmakuProps>(({ initDanmu }, ref) => {
   const danmakuPoolRef = useRef(
-    Array(50).fill().map(() => ({ 
-      ref: React.createRef(), 
+    Array(50).fill(null).map(() => ({ 
+      ref: React.createRef<HTMLDivElement>(), 
       text: "", 
       className: "danmaku-item" 
     }))
   );
-  const [prevRow, setPrevRow] = useState(0);
+  const [prevRow,setPrevRow] = useState([] as number[]);
   const currentIndexRef = useRef(0);
-  const [danmakuList, setDanmakuList] = useState([]);
+  const [danmakuList, setDanmakuList] = useState<DanmakuItem[]>(initDanmu || []);
+  
+  useEffect(() => { 
+    if (initDanmu) {
+      setDanmakuList(initDanmu);
+    }
+  }, [initDanmu]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (danmakuList.length > 0) {
-        const danmaku = danmakuList.shift();
+        const danmaku = danmakuList.shift()!;
         const currentIndex = currentIndexRef.current;
-        const row = getRandomExcluding(1, 3, prevRow);
+        const row = getRandomExcluding(1, 4, prevRow);
         danmakuPoolRef.current[currentIndex] = {
-            ...danmakuPoolRef.current[currentIndex],
-            text: danmaku.text,
-            className: `danmaku-item active row-${row}`,
+          ...danmakuPoolRef.current[currentIndex],
+          text: danmaku.text.length>40?danmaku.text.slice(0, 40)+"...":danmaku.text,
+          className: `danmaku-item active row-${row}`,
         };
         currentIndexRef.current = (currentIndex + 1) % danmakuPoolRef.current.length;
         setDanmakuList([...danmakuList, danmaku]); 
-        setPrevRow(row);
+        setPrevRow([...prevRow, row].slice(-2)); // 保留最近的2个行号
         setTimeout(() => {
           const targetIndex = currentIndex;
           if (danmakuPoolRef.current[targetIndex]) {
             danmakuPoolRef.current[targetIndex].className = "danmaku-item";
             setDanmakuList(prev => [...prev]);
           }
-        }, 10000);
+        }, 15000);
       }
     }, 1000);
 
@@ -55,15 +74,16 @@ const Danmaku = forwardRef((props, ref) => {
   }, [danmakuList]);
 
   useImperativeHandle(ref, () => ({
-    addDanmaku: (text) => {
-        let list = [{ text },...danmakuList ];
-        if (list.length > 50) {
-            list = list.slice(0, 50);
-        }
-        console.log("addDanmaku", list);
-        setDanmakuList(list);
+    addDanmaku: (text: string) => {
+      let list = [{ text }, ...danmakuList];
+      if (list.length > 50) {
+        list = list.slice(0, 50);
+      }
+      setDanmakuList(list);
+      console.log("弹幕添加成功", list);
     },
   }));
+  
   return (
     <div className="danmaku-container">
       {danmakuPoolRef.current.map((item, index) => (

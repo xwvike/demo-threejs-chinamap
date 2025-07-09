@@ -239,7 +239,6 @@ export class MapManager {
         break;
       case 'spot':
         this.spotsContainer.remove(element.object3D);
-        // 从动画列表中移除
         if (element.data && element.data.ring) {
           const index = this.animatedSpots.indexOf(element.data.ring);
           if (index > -1) {
@@ -250,7 +249,11 @@ export class MapManager {
       case 'model':
         this.modelsContainer.remove(element.object3D);
         // 移除对应的动画混合器
-        // 这里需要根据实际情况找到对应的mixer并移除
+        const mixerIndex = this.modelMixers.findIndex(mixer => mixer.getRoot() === element.object3D);
+        if (mixerIndex > -1) {
+          this.modelMixers[mixerIndex].stopAllAction();
+          this.modelMixers.splice(mixerIndex, 1);
+        }
         break;
       case 'line':
         this.linesContainer.remove(element.object3D);
@@ -310,6 +313,7 @@ export class MapManager {
       return true;
     });
     this.removeElements(idsToRemove);
+    console.log(this.elements, "All elements cleared except label-0 to label-31");
   }
 
   // 获取元素

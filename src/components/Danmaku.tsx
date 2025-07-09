@@ -80,7 +80,6 @@ const Danmaku = forwardRef<DanmakuRef, DanmakuProps>(({ initDanmu }, ref) => {
         list = list.slice(0, 50);
       }
       setDanmakuList(list);
-      console.log("弹幕添加成功", list);
     },
   }));
   

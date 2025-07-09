@@ -300,7 +300,16 @@ export class MapManager {
   // 清空所有元素
   clearAllElements(): void {
     const allIds = Array.from(this.elements.keys());
-    this.removeElements(allIds);
+    const idsToRemove = allIds.filter(id => {
+      // 保留label-0到label-31的元素
+      const match = id.match(/^label-(\d+)$/);
+      if (match) {
+        const num = parseInt(match[1]);
+        return num < 0 || num > 31;
+      }
+      return true;
+    });
+    this.removeElements(idsToRemove);
   }
 
   // 获取元素

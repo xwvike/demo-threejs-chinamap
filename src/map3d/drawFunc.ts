@@ -199,6 +199,7 @@ export function generateMapObject3D(
 // 根据地图数据生成元素数据（用于MapManager）
 export function generateElementsData(label2dData: any[]) {
   const elements: any[] = [];
+  console.log("生成元素数据", label2dData);
   
   label2dData.forEach((item: any, index: number) => {
     const { featureCenterCoord, featureName } = item;

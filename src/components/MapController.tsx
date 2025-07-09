@@ -202,8 +202,8 @@ const MapController: React.FC<MapControllerProps> = ({
 
   // 发射数据的函数
   const launchNotices = (notices: any[]) => {
-    if (currentSpotIds.length > 0 && mapRef.current?.removeElements) {
-      mapRef.current.removeElements(currentSpotIds);
+    if (mapRef.current?.clearElements) {
+      mapRef.current.clearElements();
     }
     if (!notices || notices.length === 0) return;
     let currentIndex = 0;
@@ -380,8 +380,8 @@ const MapController: React.FC<MapControllerProps> = ({
 
   // 页面重新加载函数
   const handleReload = () => {
-    if (currentSpotIds.length > 0 && mapRef.current?.removeElements) {
-      mapRef.current.removeElements(currentSpotIds);
+    if (mapRef.current?.clearElements) {
+      mapRef.current.clearElements();
     }
     recentRef.current = [];
     fetchData();
